@@ -1,0 +1,23 @@
+{
+  "gameType.itemhunt.itemhunt": "Item Hunt",
+
+  "game.itemhunt.itemhunt": "Item Hunt",
+  "game.itemhunt.itemhunt_with_crafting": "Item Hunt with Crafting",
+
+  "game.itemhunt.desc1": "Obtain as many unique",
+  "game.itemhunt.desc2": "items as you can!",
+
+  "statistic.itemhunt.items_obtained": "Items Obtained",
+
+  "text.itemhunt.desc": "Obtain as many unique items as you can!",
+  "text.itemhunt.item_obtained": "+ %s",
+  "text.itemhunt.bossbar.time_left": "Time left: %s",
+  "text.itemhunt.end.singleplayer.to_player": "Game over! You obtained %s unique items",
+  "text.itemhunt.end.singleplayer.to_spectator": "Game over! %s obtained %s unique items",
+  "text.itemhunt.end.multiplayer.winner": "%s won the game with %s unique items",
+  "text.itemhunt.end.multiplayer.winners": "%s won the game with %s unique items",
+  "text.itemhunt.end.gui.title": "%s's Items",
+  "text.itemhunt.end.gui.previous_page": "Previous Page",
+  "text.itemhunt.end.gui.next_page": "Next Page",
+  "text.itemhunt.error.finished": "This game has been finished!"
+}

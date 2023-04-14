@@ -1,0 +1,23 @@
+{
+  "gameType.itemhunt.itemhunt": "Охота за предметами",
+
+  "game.itemhunt.itemhunt": "Охота за предметами",
+  "game.itemhunt.itemhunt_with_crafting": "Охота за предметами с созданием",
+
+  "game.itemhunt.desc1": "Добудьте как можно больше",
+  "game.itemhunt.desc2": "уникальных предметов!",
+
+  "statistic.itemhunt.items_obtained": "Добыто предметов",
+
+  "text.itemhunt.desc": "Добудьте как можно больше уникальных предметов!",
+  "text.itemhunt.item_obtained": "+ %s",
+  "text.itemhunt.bossbar.time_left": "Осталось времени: %s",
+  "text.itemhunt.end.singleplayer.to_player": "Игра окончена! Добыто %s уникальных предметов",
+  "text.itemhunt.end.singleplayer.to_spectator": "Игра окончена! %s добыл %s уникальных предметов",
+  "text.itemhunt.end.multiplayer.winner": "%s победил, добыв %s уникальных предметов",
+  "text.itemhunt.end.multiplayer.winners": "%s победили, добыв %s уникальных предметов",
+  "text.itemhunt.end.gui.title": "Предметы %s",
+  "text.itemhunt.end.gui.previous_page": "Предыдущая страница",
+  "text.itemhunt.end.gui.next_page": "Следующая страница",
+  "text.itemhunt.error.finished": "Эта игра завершена!"
+}

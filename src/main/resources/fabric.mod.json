@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "itemhunt",
+  "version": "${version}",
+  "name": "Item Hunt",
+  "description": "A minigame where you obtain as many unique items as you can.",
+  "authors": [
+    "Jerozgen"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "io.github.jerozgen.itemhunt.ItemHunt"
+    ]
+  },
+  "mixins": [
+    "ItemHunt.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "fabric": "*",
+    "minecraft": ">=1.19.4",
+    "plasmid": ">=0.5.0"
+  }
+}

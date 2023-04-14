@@ -1,0 +1,18 @@
+{
+  "type": "itemhunt:itemhunt",
+  "icon": "minecraft:bundle",
+  "description": [
+    {"translate": "game.itemhunt.desc1"},
+    {"translate": "game.itemhunt.desc2"}
+  ],
+  "players": {
+    "min": 1,
+    "max": 32,
+    "threshold": 1,
+    "countdown": {
+      "ready_seconds": 15
+    }
+  },
+  "dimension_options": "minecraft:overworld",
+  "statistic_bundle": "itemhunt"
+}
