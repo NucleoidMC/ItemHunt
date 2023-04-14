@@ -48,12 +48,12 @@ public final class ItemHuntTexts {
 
     public static MutableText win(List<UUID> winners, int itemsCount, boolean singleplayer, MinecraftServer server) {
         if (winners.size() == 1 || singleplayer) {
-            var key = "text.itemhunt.end." + (singleplayer ? "singleplayer.to_spectator" : "multiplayer.single");
+            var key = "text.itemhunt.end." + (singleplayer ? "singleplayer.to_spectator" : "multiplayer.winner");
             var name = ItemHuntUtils.getPlayerNameByUUID(winners.get(0), server);
             return Text.translatable(key, name, itemsCount).formatted(Formatting.GOLD);
         }
         var names = Texts.join(winners, uuid -> ItemHuntUtils.getPlayerNameByUUID(uuid, server));
-        return Text.translatable("text.itemhunt.end.multiplayer.multiple", names, itemsCount).formatted(Formatting.GOLD);
+        return Text.translatable("text.itemhunt.end.multiplayer.winners", names, itemsCount).formatted(Formatting.GOLD);
     }
 
     public static MutableText itemObtained(Item item) {
