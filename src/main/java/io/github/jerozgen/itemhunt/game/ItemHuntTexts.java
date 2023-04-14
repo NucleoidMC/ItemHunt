@@ -20,6 +20,9 @@ public final class ItemHuntTexts {
                         .formatted(Formatting.BOLD)
                         .formatted(Formatting.WHITE))
                 .append("\n").append(Text.translatable("text.itemhunt.desc"))
+                .append("\n")
+                .append("\n").append(Text.translatable("options.%s.composed".formatted(game.config().crafting() ? "on" : "off"),
+                        Text.translatable("container.crafting")))
                 .append("\n");
     }
 
