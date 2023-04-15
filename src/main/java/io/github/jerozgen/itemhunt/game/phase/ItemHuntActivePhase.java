@@ -14,7 +14,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -86,11 +85,11 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.CONDUIT_POWER, -1, 0, false, false));
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, -1, 0, false, false));
 
-            player.getInventory().insertStack(getUnbreakableStartStack(Items.IRON_SWORD));
-            player.getInventory().insertStack(getUnbreakableStartStack(Items.IRON_AXE));
-            player.getInventory().insertStack(getUnbreakableStartStack(Items.IRON_PICKAXE));
-            player.getInventory().insertStack(getUnbreakableStartStack(Items.IRON_SHOVEL));
-            player.getInventory().insertStack(getUnbreakableStartStack(Items.IRON_HOE));
+            game.config().startItems().ifPresent(stacks -> stacks.forEach(stack -> {
+                var stackCopy = stack.copy();
+                stackCopy.getOrCreateNbt().putBoolean(START_ITEM_NBT_KEY, true);
+                player.getInventory().insertStack(stackCopy);
+            }));
 
             itemsCollectedByPlayers.put(player.getUuid(), new LinkedHashSet<>());
             sidebar.setLine(player.getEntityName(), 0);
@@ -186,17 +185,5 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
                     new SubtitleS2CPacket(ItemHuntTexts.itemObtained(item)))));
             player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(), SoundCategory.PLAYERS, 1, 1);
         }
-    }
-
-    private static ItemStack getUnbreakableStartStack(Item item) {
-        var stack = getStartStack(item);
-        stack.getOrCreateNbt().putBoolean("Unbreakable", true);
-        return stack;
-    }
-
-    private static ItemStack getStartStack(Item item) {
-        var stack = item.getDefaultStack();
-        stack.getOrCreateNbt().putBoolean(START_ITEM_NBT_KEY, true);
-        return stack;
     }
 }
