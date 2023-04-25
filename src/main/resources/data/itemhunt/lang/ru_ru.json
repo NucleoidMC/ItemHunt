@@ -7,6 +7,9 @@
   "game.itemhunt.desc1": "Добудьте как можно больше",
   "game.itemhunt.desc2": "уникальных предметов!",
 
+  "statistic.bundle.itemhunt": "Охота за предметами",
+  "statistic.bundle.itemhunt_with_crafting": "Охота за предметами с созданием",
+
   "statistic.itemhunt.items_obtained": "Добыто предметов",
 
   "text.itemhunt.desc": "Добудьте как можно больше уникальных предметов!",

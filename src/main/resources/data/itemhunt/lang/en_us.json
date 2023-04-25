@@ -7,6 +7,9 @@
   "game.itemhunt.desc1": "Obtain as many unique",
   "game.itemhunt.desc2": "items as you can!",
 
+  "statistic.bundle.itemhunt": "Item Hunt",
+  "statistic.bundle.itemhunt_with_crafting": "Item Hunt with Crafting",
+
   "statistic.itemhunt.items_obtained": "Items Obtained",
 
   "text.itemhunt.desc": "Obtain as many unique items as you can!",
