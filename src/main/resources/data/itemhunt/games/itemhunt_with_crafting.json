@@ -14,7 +14,17 @@
     }
   },
   "duration": 360,
-  "dimension_options": "minecraft:overworld",
+  "dimension_options": {
+    "type": "minecraft:overworld",
+    "generator": {
+      "type": "minecraft:noise",
+      "biome_source": {
+        "type": "minecraft:multi_noise",
+        "preset": "minecraft:overworld"
+      },
+      "settings": "minecraft:overworld"
+    }
+  },
   "statistic_bundle": "itemhunt_with_crafting",
   "crafting": true,
   "start_items": [

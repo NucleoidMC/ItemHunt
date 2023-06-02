@@ -10,16 +10,21 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.SpawnLocating;
+import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Unit;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.border.WorldBorderListener;
+import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
+import xyz.nucleoid.fantasy.util.VoidChunkGenerator;
 import xyz.nucleoid.plasmid.game.GameActivity;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
 import xyz.nucleoid.plasmid.game.GameOpenProcedure;
@@ -35,22 +40,34 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
 
     public static GameOpenProcedure open(GameOpenContext<ItemHuntConfig> context) {
         var config = context.config();
-        var dimensionOptions = context.server().getRegistryManager().get(RegistryKeys.DIMENSION).get(config.dimensionOptionsKey());
-        if (dimensionOptions == null)
-            throw new NullPointerException("Couldn't find %s dimension options from %s game config"
-                    .formatted(config.dimensionOptionsKey().getValue(), context.game().source()));
+        var dimensionOptions = config.dimensionOptions();
+
         var worldConfig = new RuntimeWorldConfig()
                 .setDimensionType(dimensionOptions.dimensionTypeEntry())
                 .setGenerator(dimensionOptions.chunkGenerator())
-                .setSeed(context.server().getOverworld().getRandom().nextLong());
-        return context.openWithWorld(worldConfig, (activity, world) -> {
+                .setSeed(Random.create().nextLong());
+
+        var waitingWorldConfig = new RuntimeWorldConfig()
+                .setDimensionType(DimensionTypes.OVERWORLD)
+                .setGenerator(new VoidChunkGenerator(context.server().getRegistryManager().get(RegistryKeys.BIOME)))
+                .setWorldConstructor(LazyWaitingWorld::new);
+
+
+        return context.open((activity) -> {
             var gameSpace = activity.getGameSpace();
+            var t = System.currentTimeMillis();
+            var waitingWorld = gameSpace.getWorlds().add(waitingWorldConfig);
+            System.out.println("WAIT: " + (System.currentTimeMillis() - t));
+            t = System.currentTimeMillis();
+            var world = gameSpace.getWorlds().add(worldConfig);
+            System.out.println("REG: " + (System.currentTimeMillis() - t));
+
             var statistics = config.statisticBundleNamespace()
                     .map(value -> gameSpace.getStatistics().bundle(value))
                     .orElse(null);
             var game = new ItemHuntGame(config, gameSpace, world, findSpawnPos(world), statistics);
             activity.listen(GameActivityEvents.CREATE, () -> {
-                var waitingPhase = new ItemHuntWaitingPhase(game);
+                var waitingPhase = new ItemHuntWaitingPhase(game, waitingWorld);
                 game.gameSpace.setActivity(waitingPhase::setup);
             });
         });
@@ -58,6 +75,7 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
 
     public ItemHuntGame {
         world.getWorldBorder().addListener(getWorldBorderListener());
+        world.getChunkManager().addTicket(ChunkTicketType.START, new ChunkPos(spawnPos), 3, Unit.INSTANCE);
     }
 
     public void setup(GameActivity activity) {
@@ -93,12 +111,10 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
         var chunkPos = new ChunkPos(spawnPos);
         var x = chunkPos.getStartX() + 8;
         var z = chunkPos.getStartZ() + 8;
-        int y = chunkManager.getChunkGenerator().getSpawnHeight(world);
-        if (y < world.getBottomY())
-            y = world.getTopY(Heightmap.Type.WORLD_SURFACE, x, z);
+        int y = chunkManager.getChunkGenerator().getHeightOnGround(x, z, Heightmap.Type.MOTION_BLOCKING, world, chunkManager.getNoiseConfig());
         spawnPos = new BlockPos(x, y, z);
 
-        var dx = 0;
+        /*var dx = 0;
         var dz = 0;
         var stepX = 0;
         var stepZ = -1;
@@ -117,7 +133,7 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
             }
             dx += stepX;
             dz += stepZ;
-        }
+        }*/
 
         return spawnPos;
     }
