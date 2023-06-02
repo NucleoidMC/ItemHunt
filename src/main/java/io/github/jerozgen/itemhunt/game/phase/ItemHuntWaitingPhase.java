@@ -69,7 +69,6 @@ public class ItemHuntWaitingPhase extends ItemHuntPhase {
 
     private boolean isMainWorldReady() {
         return this.game.world().isChunkLoaded(this.spawnChunk);
-        //return this.game.world().getChunkManager().getLoadedChunkCount() >= 36;
     }
 
     private ServerWorld getActiveWorld() {
