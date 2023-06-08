@@ -6,7 +6,6 @@ import net.minecraft.network.packet.s2c.play.WorldBorderInitializeS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.GameMode;
 import xyz.nucleoid.plasmid.game.GameActivity;
 import xyz.nucleoid.plasmid.game.GameResult;
@@ -19,14 +18,13 @@ import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
 public class ItemHuntWaitingPhase extends ItemHuntPhase {
     private final ServerWorld waitingWorld;
     private boolean hasMoved = false;
-    private long spawnChunk;
+    private final long spawnChunk;
     private ItemHuntActivePhase delayedPhase;
 
     public ItemHuntWaitingPhase(ItemHuntGame game, ServerWorld waitingWorld) {
         super(game);
         this.waitingWorld = waitingWorld;
         this.spawnChunk = new ChunkPos(game.spawnPos()).toLong();
-        System.out.println(this.game.spawnPos());
     }
 
     @Override

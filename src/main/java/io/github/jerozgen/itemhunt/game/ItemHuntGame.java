@@ -52,16 +52,10 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
                 .setGenerator(new VoidChunkGenerator(context.server().getRegistryManager().get(RegistryKeys.BIOME)))
                 .setWorldConstructor(LazyWaitingWorld::new);
 
-
         return context.open((activity) -> {
             var gameSpace = activity.getGameSpace();
-            var t = System.currentTimeMillis();
             var waitingWorld = gameSpace.getWorlds().add(waitingWorldConfig);
-            System.out.println("WAIT: " + (System.currentTimeMillis() - t));
-            t = System.currentTimeMillis();
             var world = gameSpace.getWorlds().add(worldConfig);
-            System.out.println("REG: " + (System.currentTimeMillis() - t));
-
             var statistics = config.statisticBundleNamespace()
                     .map(value -> gameSpace.getStatistics().bundle(value))
                     .orElse(null);
