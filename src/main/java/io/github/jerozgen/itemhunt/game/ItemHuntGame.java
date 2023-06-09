@@ -9,14 +9,12 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.SpawnLocating;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Unit;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.border.WorldBorder;
@@ -101,24 +99,23 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
 
     private static BlockPos findSpawnPos(ServerWorld world) {
         var chunkManager = world.getChunkManager();
-        var spawnPos = chunkManager.getNoiseConfig().getMultiNoiseSampler().findBestSpawnPosition();
-        var chunkPos = new ChunkPos(spawnPos);
-        var x = chunkPos.getStartX() + 8;
-        var z = chunkPos.getStartZ() + 8;
-        int y = chunkManager.getChunkGenerator().getHeightOnGround(x, z, Heightmap.Type.MOTION_BLOCKING, world, chunkManager.getNoiseConfig());
-        spawnPos = new BlockPos(x, y, z);
+        var noiseConfig = chunkManager.getNoiseConfig();
+        var chunkGenerator = chunkManager.getChunkGenerator();
+        var startChunkPos = new ChunkPos(noiseConfig.getMultiNoiseSampler().findBestSpawnPosition());
 
-        /*var dx = 0;
+        var dx = 0;
         var dz = 0;
         var stepX = 0;
         var stepZ = -1;
-        for (var i = 0; i < MathHelper.square(11); i++) {
+        for (var i = 0; i < 11 * 11; i++) {
             if (dx >= -5 && dx <= 5 && dz >= -5 && dz <= 5) {
-                var pos = SpawnLocating.findServerSpawnPoint(world, new ChunkPos(chunkPos.x + dx, chunkPos.z + dz));
-                if (pos != null) {
-                    spawnPos = pos;
-                    break;
-                }
+                var chunkPos = new ChunkPos(startChunkPos.x + dx, startChunkPos.z + dz);
+                var x = chunkPos.getStartX() + 8;
+                var z = chunkPos.getStartZ() + 8;
+                var y = chunkGenerator.getHeightOnGround(x, z, Heightmap.Type.MOTION_BLOCKING, world, noiseConfig);
+                var oceanFloorY = chunkGenerator.getHeightOnGround(x, z, Heightmap.Type.OCEAN_FLOOR, world, noiseConfig);
+                if (oceanFloorY >= y)
+                    return new BlockPos(x, y, z);
             }
             if (dx == dz || dx < 0 && dx == -dz || dx > 0 && dx == 1 - dz) {
                 var tmp = stepX;
@@ -127,9 +124,12 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
             }
             dx += stepX;
             dz += stepZ;
-        }*/
+        }
 
-        return spawnPos;
+        var x = startChunkPos.getStartX() + 8;
+        var z = startChunkPos.getStartZ() + 8;
+        var y = chunkGenerator.getHeightOnGround(x, z, Heightmap.Type.MOTION_BLOCKING, world, noiseConfig);
+        return new BlockPos(x, y, z);
     }
 
     private WorldBorderListener getWorldBorderListener() {
