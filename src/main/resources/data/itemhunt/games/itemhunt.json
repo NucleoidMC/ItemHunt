@@ -10,7 +10,7 @@
     "max": 32,
     "threshold": 1,
     "countdown": {
-      "ready_seconds": 20
+      "ready_seconds": 15
     }
   },
   "dimension_options": {

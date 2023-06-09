@@ -1,7 +1,7 @@
 package io.github.jerozgen.itemhunt.game;
 
 import io.github.jerozgen.itemhunt.event.StatusEffectAddEvent;
-import io.github.jerozgen.itemhunt.game.phase.ItemHuntWaitingPhase;
+import io.github.jerozgen.itemhunt.game.phase.ItemHuntLoadingPhase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -39,28 +39,25 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
     public static GameOpenProcedure open(GameOpenContext<ItemHuntConfig> context) {
         var config = context.config();
         var dimensionOptions = config.dimensionOptions();
-
         var worldConfig = new RuntimeWorldConfig()
                 .setDimensionType(dimensionOptions.dimensionTypeEntry())
                 .setGenerator(dimensionOptions.chunkGenerator())
                 .setSeed(Random.create().nextLong());
-
-        var waitingWorldConfig = new RuntimeWorldConfig()
+        var loadingWorldConfig = new RuntimeWorldConfig()
                 .setDimensionType(DimensionTypes.OVERWORLD)
                 .setGenerator(new VoidChunkGenerator(context.server().getRegistryManager().get(RegistryKeys.BIOME)))
-                .setWorldConstructor(LazyWaitingWorld::new);
-
+                .setWorldConstructor(LazyLoadingWorld::new);
         return context.open((activity) -> {
             var gameSpace = activity.getGameSpace();
-            var waitingWorld = gameSpace.getWorlds().add(waitingWorldConfig);
+            var loadingWorld = gameSpace.getWorlds().add(loadingWorldConfig);
             var world = gameSpace.getWorlds().add(worldConfig);
             var statistics = config.statisticBundleNamespace()
                     .map(value -> gameSpace.getStatistics().bundle(value))
                     .orElse(null);
             var game = new ItemHuntGame(config, gameSpace, world, findSpawnPos(world), statistics);
             activity.listen(GameActivityEvents.CREATE, () -> {
-                var waitingPhase = new ItemHuntWaitingPhase(game, waitingWorld);
-                game.gameSpace.setActivity(waitingPhase::setup);
+                var loadingPhase = new ItemHuntLoadingPhase(game, loadingWorld);
+                game.gameSpace.setActivity(loadingPhase::setup);
             });
         });
     }

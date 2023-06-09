@@ -17,12 +17,13 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.fantasy.RuntimeWorld;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 
-public class LazyWaitingWorld extends RuntimeWorld {
+public class LazyLoadingWorld extends RuntimeWorld {
     private final WorldChunk chunk;
 
-    protected LazyWaitingWorld(MinecraftServer server, RegistryKey<World> registryKey, RuntimeWorldConfig config, Style style) {
+    protected LazyLoadingWorld(MinecraftServer server, RegistryKey<World> registryKey, RuntimeWorldConfig config, Style style) {
         super(server, registryKey, config, style);
-        this.chunk = new EmptyChunk(this, ChunkPos.ORIGIN, server.getRegistryManager().get(RegistryKeys.BIOME).getEntry(BiomeKeys.THE_VOID).get()) {
+        var biome = server.getRegistryManager().get(RegistryKeys.BIOME).getEntry(BiomeKeys.THE_VOID).get();
+        this.chunk = new EmptyChunk(this, ChunkPos.ORIGIN, biome) {
             @Override
             public BlockState getBlockState(BlockPos pos) {
                 return Blocks.BARRIER.getDefaultState();
