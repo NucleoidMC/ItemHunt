@@ -14,6 +14,7 @@ import xyz.nucleoid.plasmid.game.player.PlayerOffer;
 import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
 
 public class ItemHuntWaitingPhase extends ItemHuntPhase {
+
     public ItemHuntWaitingPhase(ItemHuntGame game) {
         super(game);
     }
@@ -38,8 +39,8 @@ public class ItemHuntWaitingPhase extends ItemHuntPhase {
 
     private PlayerOfferResult offerPlayer(PlayerOffer offer) {
         return offer.accept(game.world(), game.spawnPos().toCenterPos()).and(() -> {
-            offer.player().sendMessage(ItemHuntTexts.description(game), false);
             offer.player().changeGameMode(GameMode.ADVENTURE);
+            offer.player().sendMessage(ItemHuntTexts.description(game), false);
         });
     }
 

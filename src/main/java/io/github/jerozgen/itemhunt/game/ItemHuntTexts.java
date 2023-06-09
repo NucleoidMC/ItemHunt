@@ -13,6 +13,10 @@ import java.util.UUID;
 public final class ItemHuntTexts {
     public static final int ACCENT_COLOR = 0xaeffda;
 
+    public static MutableText loading() {
+        return Text.translatable("menu.generatingLevel");
+    }
+
     public static MutableText description(ItemHuntGame game) {
         var gameName = game.gameSpace().getMetadata().sourceConfig().name();
         return Text.empty().formatted(Formatting.GRAY)
