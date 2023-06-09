@@ -66,9 +66,12 @@ public final class ItemHuntTexts {
     }
 
     public static MutableText timeLeft(int seconds) {
-        var timeText = Text.literal("%02d:%02d".formatted(seconds / 60, seconds % 60))
+        return Text.translatable("text.itemhunt.bossbar.time_left", time(seconds));
+    }
+
+    public static MutableText time(int seconds) {
+        return Text.literal("%02d:%02d".formatted(seconds / 60, seconds % 60))
                 .styled(s -> s.withColor(ACCENT_COLOR));
-        return Text.translatable("text.itemhunt.bossbar.time_left", timeText);
     }
 
     public static MutableText finishedError() {

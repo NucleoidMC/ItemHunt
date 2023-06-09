@@ -2,18 +2,26 @@ package io.github.jerozgen.itemhunt.game.phase;
 
 import io.github.jerozgen.itemhunt.game.ItemHuntGame;
 import io.github.jerozgen.itemhunt.game.ItemHuntTexts;
+import net.minecraft.entity.boss.BossBar;
+import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import xyz.nucleoid.plasmid.game.GameActivity;
 import xyz.nucleoid.plasmid.game.GameCloseReason;
+import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.common.widget.BossBarWidget;
 import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
 import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
 import xyz.nucleoid.plasmid.game.player.PlayerOffer;
 import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
 
-public class ItemHuntEndingPhase extends ItemHuntPhase {
-    public static final long ENDING_DURATION = 30 * 1000;
+import java.util.concurrent.TimeUnit;
 
+public class ItemHuntEndingPhase extends ItemHuntPhase {
+    public static final long ENDING_DURATION = TimeUnit.SECONDS.toMillis(30);
+
+    private BossBarWidget bossbar;
     private long endTime;
+    private int lastSecondsLeft = -1;
 
     public ItemHuntEndingPhase(ItemHuntGame game) {
         super(game);
@@ -21,6 +29,9 @@ public class ItemHuntEndingPhase extends ItemHuntPhase {
 
     @Override
     protected void setupPhase(GameActivity activity) {
+        var widgets = GlobalWidgets.addTo(activity);
+        bossbar = widgets.addBossBar(Text.empty(), BossBar.Color.BLUE, BossBar.Style.PROGRESS);
+
         activity.listen(GameActivityEvents.ENABLE, this::start);
         activity.listen(GameActivityEvents.TICK, this::tick);
         activity.listen(GamePlayerEvents.OFFER, this::offerPlayer);
@@ -31,7 +42,14 @@ public class ItemHuntEndingPhase extends ItemHuntPhase {
     }
 
     private void tick() {
-        if (Util.getMeasuringTimeMs() >= endTime)
+        var millisLeft = endTime - Util.getMeasuringTimeMs();
+        var secondsLeft = (int) TimeUnit.MILLISECONDS.toSeconds(millisLeft);
+        if (secondsLeft != lastSecondsLeft) {
+            lastSecondsLeft = secondsLeft;
+            bossbar.setTitle(ItemHuntTexts.time(secondsLeft));
+        }
+        bossbar.setProgress((float) (millisLeft / (double) ENDING_DURATION));
+        if (millisLeft <= 0)
             game.gameSpace().close(GameCloseReason.FINISHED);
     }
 
