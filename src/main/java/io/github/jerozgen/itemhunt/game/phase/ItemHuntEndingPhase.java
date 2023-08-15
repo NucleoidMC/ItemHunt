@@ -17,7 +17,7 @@ import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
 import java.util.concurrent.TimeUnit;
 
 public class ItemHuntEndingPhase extends ItemHuntPhase {
-    public static final long ENDING_DURATION = TimeUnit.SECONDS.toMillis(30);
+    public static final long ENDING_DURATION = TimeUnit.SECONDS.toMillis(15);
 
     private BossBarWidget bossbar;
     private long endTime;
