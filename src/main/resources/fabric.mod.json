@@ -9,7 +9,7 @@
   ],
   "contact": {},
   "license": "MIT",
-  "environment": "server",
+  "environment": "*",
   "entrypoints": {
     "main": [
       "io.github.jerozgen.itemhunt.ItemHunt"
