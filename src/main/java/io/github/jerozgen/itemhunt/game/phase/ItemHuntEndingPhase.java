@@ -17,10 +17,9 @@ import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
 import java.util.concurrent.TimeUnit;
 
 public class ItemHuntEndingPhase extends ItemHuntPhase {
-    public static final long ENDING_DURATION = TimeUnit.SECONDS.toMillis(15);
-
     private BossBarWidget bossbar;
     private long endTime;
+    private long endDuration;
     private int lastSecondsLeft = -1;
 
     public ItemHuntEndingPhase(ItemHuntGame game) {
@@ -38,7 +37,8 @@ public class ItemHuntEndingPhase extends ItemHuntPhase {
     }
 
     private void start() {
-        endTime = Util.getMeasuringTimeMs() + ENDING_DURATION;
+        endDuration = TimeUnit.SECONDS.toMillis(game.config().endDuration());
+        endTime = Util.getMeasuringTimeMs() + endDuration;
     }
 
     private void tick() {
@@ -48,7 +48,7 @@ public class ItemHuntEndingPhase extends ItemHuntPhase {
             lastSecondsLeft = secondsLeft;
             bossbar.setTitle(ItemHuntTexts.time(secondsLeft));
         }
-        bossbar.setProgress((float) (millisLeft / (double) ENDING_DURATION));
+        bossbar.setProgress((float) (millisLeft / (double) endDuration));
         if (millisLeft <= 0)
             game.gameSpace().close(GameCloseReason.FINISHED);
     }
