@@ -3,11 +3,14 @@ package io.github.jerozgen.itemhunt.game.phase;
 import io.github.jerozgen.itemhunt.game.ItemHuntGame;
 import io.github.jerozgen.itemhunt.game.ItemHuntTexts;
 import net.minecraft.entity.boss.BossBar;
+import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.Unit;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.GameMode;
 import xyz.nucleoid.plasmid.game.GameActivity;
+import xyz.nucleoid.plasmid.game.GameCloseReason;
 import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
 import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
 import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
@@ -29,9 +32,11 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
         var widgets = GlobalWidgets.addTo(activity);
         var bossbar = widgets.addBossBar(Text.empty(), BossBar.Color.YELLOW, BossBar.Style.PROGRESS);
         bossbar.setTitle(ItemHuntTexts.loading());
+        game.world().getChunkManager().addTicket(ChunkTicketType.START, new ChunkPos(game.spawnPos()), 3, Unit.INSTANCE);
 
         activity.listen(GamePlayerEvents.OFFER, this::offerPlayer);
         activity.listen(GameActivityEvents.TICK, this::tick);
+        activity.listen(GameActivityEvents.DESTROY, this::destroy);
     }
 
     private void tick() {
@@ -51,5 +56,9 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
             offer.player().sendMessage(ItemHuntTexts.description(game), false);
             offer.player().changeGameMode(GameMode.SPECTATOR);
         });
+    }
+
+    private void destroy(GameCloseReason reason) {
+        game.world().getChunkManager().removeTicket(ChunkTicketType.START, new ChunkPos(game.spawnPos()), 3, Unit.INSTANCE);
     }
 }

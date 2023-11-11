@@ -64,7 +64,6 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
 
     public ItemHuntGame {
         world.getWorldBorder().addListener(getWorldBorderListener());
-        world.getChunkManager().addTicket(ChunkTicketType.START, new ChunkPos(spawnPos), 3, Unit.INSTANCE);
     }
 
     public void setup(GameActivity activity) {

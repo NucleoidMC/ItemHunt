@@ -119,7 +119,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
             game.stat(stats -> stats.forPlayer(player).increment(StatisticKeys.GAMES_LOST, 1));
         itemsCollectedByPlayers.remove(player.getUuid());
         sidebar.removeLine(player.getEntityName());
-        if (itemsCollectedByPlayers.size() == 0)
+        if (itemsCollectedByPlayers.isEmpty())
             game.gameSpace().close(GameCloseReason.FINISHED);
     }
 
@@ -146,7 +146,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
                 .filter(entry -> entry.getValue().size() == maxSize)
                 .map(Map.Entry::getKey)
                 .toList();
-        if (winners.size() > 0) {
+        if (!winners.isEmpty()) {
             var server = game.world().getServer();
             var winner = winners.get(0);
             var winnerItems = new ArrayList<>(itemsCollectedByPlayers.get(winner));
