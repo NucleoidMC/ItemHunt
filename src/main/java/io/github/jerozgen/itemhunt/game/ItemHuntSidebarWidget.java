@@ -4,6 +4,7 @@ import eu.pb4.sidebars.api.Sidebar;
 import eu.pb4.sidebars.api.lines.AbstractSidebarLine;
 import eu.pb4.sidebars.api.lines.LineBuilder;
 import eu.pb4.sidebars.api.lines.SidebarLine;
+import net.minecraft.scoreboard.number.NumberFormat;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
@@ -114,15 +115,15 @@ public class ItemHuntSidebarWidget extends Sidebar implements GameWidget {
         }
 
         @Override
-        public Text getText() {
-            return Text.of(name);
+        public Text getText(ServerPlayNetworkHandler handler) {
+            if (handler.player.getNameForScoreboard().equals(name))
+                return Text.literal(name).styled(s -> s.withColor(ItemHuntTexts.ACCENT_COLOR));
+            return Text.literal(name);
         }
 
         @Override
-        public Text getText(ServerPlayNetworkHandler handler) {
-            if (handler.player.getEntityName().equals(name))
-                return Text.empty().append(super.getText(handler)).styled(s -> s.withColor(ItemHuntTexts.ACCENT_COLOR));
-            return super.getText(handler);
+        public @Nullable NumberFormat getNumberFormat(ServerPlayNetworkHandler handler) {
+            return null;
         }
     }
 }
