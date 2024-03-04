@@ -92,7 +92,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
             }));
 
             itemsCollectedByPlayers.put(player.getUuid(), new LinkedHashSet<>());
-            sidebar.setLine(player.getEntityName(), 0);
+            sidebar.setLine(player.getNameForScoreboard(), 0);
 
             game.stat(stats -> stats.forPlayer(player).increment(StatisticKeys.GAMES_PLAYED, 1));
         }
@@ -118,7 +118,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
         if (!singleplayer)
             game.stat(stats -> stats.forPlayer(player).increment(StatisticKeys.GAMES_LOST, 1));
         itemsCollectedByPlayers.remove(player.getUuid());
-        sidebar.removeLine(player.getEntityName());
+        sidebar.removeLine(player.getNameForScoreboard());
         if (itemsCollectedByPlayers.isEmpty())
             game.gameSpace().close(GameCloseReason.FINISHED);
     }
@@ -178,7 +178,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
         var item = stack.getItem();
         if (collectedItems.add(item)) {
             game.stat(stats -> stats.forPlayer(player).increment(ITEMS_OBTAINED_STAT_KEY, 1));
-            sidebar.setLine(player.getEntityName(), collectedItems.size());
+            sidebar.setLine(player.getNameForScoreboard(), collectedItems.size());
             player.networkHandler.sendPacket(new BundleS2CPacket(List.of(
                     new TitleFadeS2CPacket(0, 20, 10),
                     new TitleS2CPacket(Text.of("")),
