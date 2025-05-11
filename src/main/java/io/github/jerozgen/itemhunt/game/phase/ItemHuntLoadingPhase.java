@@ -3,6 +3,7 @@ package io.github.jerozgen.itemhunt.game.phase;
 import io.github.jerozgen.itemhunt.game.ItemHuntGame;
 import io.github.jerozgen.itemhunt.game.ItemHuntTexts;
 import net.minecraft.entity.boss.BossBar;
+import net.minecraft.server.world.ChunkTicket;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -34,7 +35,7 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
         var widgets = GlobalWidgets.addTo(activity);
         var bossbar = widgets.addBossBar(Text.empty(), BossBar.Color.YELLOW, BossBar.Style.PROGRESS);
         bossbar.setTitle(ItemHuntTexts.loading());
-        game.world().getChunkManager().addTicket(ChunkTicketType.START, new ChunkPos(game.spawnPos()), 2, Unit.INSTANCE);
+        game.world().getChunkManager().addTicket(new ChunkTicket(ChunkTicketType.START, 2), new ChunkPos(game.spawnPos()));
 
         activity.listen(GamePlayerEvents.ACCEPT, this::acceptPlayer);
         activity.listen(GameActivityEvents.TICK, this::tick);
@@ -61,6 +62,6 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
     }
 
     private void destroy(GameCloseReason reason) {
-        game.world().getChunkManager().removeTicket(ChunkTicketType.START, new ChunkPos(game.spawnPos()), 3, Unit.INSTANCE);
+        game.world().getChunkManager().removeTicket(ChunkTicketType.START, new ChunkPos(game.spawnPos()), 3);
     }
 }
