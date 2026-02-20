@@ -2,25 +2,28 @@ package io.github.jerozgen.itemhunt.game;
 
 import io.github.jerozgen.itemhunt.event.StatusEffectAddEvent;
 import io.github.jerozgen.itemhunt.game.phase.ItemHuntLoadingPhase;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ChunkTicketType;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Unit;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.border.WorldBorderListener;
-import net.minecraft.world.dimension.DimensionTypes;
+import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderSizePacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDelayPacket;
+import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDistancePacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.border.BorderChangeListener;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 import xyz.nucleoid.fantasy.util.VoidChunkGenerator;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
@@ -35,18 +38,18 @@ import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
 
 import java.util.function.Consumer;
 
-public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWorld world, BlockPos spawnPos, GameStatisticBundle statistics) {
+public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerLevel world, BlockPos spawnPos, GameStatisticBundle statistics) {
 
     public static GameOpenProcedure open(GameOpenContext<ItemHuntConfig> context) {
         var config = context.config();
         var dimensionOptions = config.dimensionOptions();
         var worldConfig = new RuntimeWorldConfig()
-                .setDimensionType(dimensionOptions.dimensionTypeEntry())
-                .setGenerator(dimensionOptions.chunkGenerator())
-                .setSeed(Random.create().nextLong());
+                .setDimensionType(dimensionOptions.type())
+                .setGenerator(dimensionOptions.generator())
+                .setSeed(RandomSource.create().nextLong());
         var loadingWorldConfig = new RuntimeWorldConfig()
-                .setDimensionType(DimensionTypes.OVERWORLD)
-                .setGenerator(new VoidChunkGenerator(context.server().getRegistryManager().getOrThrow(RegistryKeys.BIOME)))
+                .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
+                .setGenerator(new VoidChunkGenerator(context.server().registryAccess().lookupOrThrow(Registries.BIOME)))
                 .setWorldConstructor(LazyLoadingWorld::new);
         return context.open((activity) -> {
             var gameSpace = activity.getGameSpace();
@@ -77,11 +80,11 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
         activity.deny(GameRuleType.PORTALS);
     }
 
-    private ActionResult onAddStatusEffect(Entity entity, StatusEffectInstance instance, @Nullable Entity source) {
-        if (entity instanceof ServerPlayerEntity && instance.getEffectType().value().getCategory() == StatusEffectCategory.HARMFUL) {
-            return ActionResult.FAIL;
+    private InteractionResult onAddStatusEffect(Entity entity, MobEffectInstance instance, @Nullable Entity source) {
+        if (entity instanceof ServerPlayer && instance.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
+            return InteractionResult.FAIL;
         }
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     public void stat(Consumer<GameStatisticBundle> consumer) {
@@ -90,15 +93,15 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
 
     public void sendToAll(Packet<?> packet) {
         for (var player : gameSpace.getPlayers()) {
-            player.networkHandler.sendPacket(packet);
+            player.connection.send(packet);
         }
     }
 
-    private static BlockPos findSpawnPos(ServerWorld world) {
-        var chunkManager = world.getChunkManager();
-        var noiseConfig = chunkManager.getNoiseConfig();
-        var chunkGenerator = chunkManager.getChunkGenerator();
-        var startChunkPos = new ChunkPos(noiseConfig.getMultiNoiseSampler().findBestSpawnPosition());
+    private static BlockPos findSpawnPos(ServerLevel world) {
+        var chunkManager = world.getChunkSource();
+        var noiseConfig = chunkManager.randomState();
+        var chunkGenerator = chunkManager.getGenerator();
+        var startChunkPos = new ChunkPos(noiseConfig.sampler().findSpawnPosition());
 
         var dx = 0;
         var dz = 0;
@@ -107,10 +110,10 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
         for (var i = 0; i < 11 * 11; i++) {
             if (dx >= -5 && dx <= 5 && dz >= -5 && dz <= 5) {
                 var chunkPos = new ChunkPos(startChunkPos.x + dx, startChunkPos.z + dz);
-                var x = chunkPos.getStartX() + 8;
-                var z = chunkPos.getStartZ() + 8;
-                var y = chunkGenerator.getHeightOnGround(x, z, Heightmap.Type.MOTION_BLOCKING, world, noiseConfig);
-                var oceanFloorY = chunkGenerator.getHeightOnGround(x, z, Heightmap.Type.OCEAN_FLOOR, world, noiseConfig);
+                var x = chunkPos.getMinBlockX() + 8;
+                var z = chunkPos.getMinBlockZ() + 8;
+                var y = chunkGenerator.getFirstFreeHeight(x, z, Heightmap.Types.MOTION_BLOCKING, world, noiseConfig);
+                var oceanFloorY = chunkGenerator.getFirstFreeHeight(x, z, Heightmap.Types.OCEAN_FLOOR, world, noiseConfig);
                 if (oceanFloorY >= y)
                     return new BlockPos(x, y, z);
             }
@@ -123,44 +126,44 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
             dz += stepZ;
         }
 
-        var x = startChunkPos.getStartX() + 8;
-        var z = startChunkPos.getStartZ() + 8;
-        var y = chunkGenerator.getHeightOnGround(x, z, Heightmap.Type.MOTION_BLOCKING, world, noiseConfig);
+        var x = startChunkPos.getMinBlockX() + 8;
+        var z = startChunkPos.getMinBlockZ() + 8;
+        var y = chunkGenerator.getFirstFreeHeight(x, z, Heightmap.Types.MOTION_BLOCKING, world, noiseConfig);
         return new BlockPos(x, y, z);
     }
 
-    private WorldBorderListener getWorldBorderListener() {
-        return new WorldBorderListener() {
+    private BorderChangeListener getWorldBorderListener() {
+        return new BorderChangeListener() {
             @Override
-            public void onSizeChange(WorldBorder border, double size) {
-                ItemHuntGame.this.sendToAll(new WorldBorderSizeChangedS2CPacket(border));
+            public void onSetSize(@NonNull WorldBorder border, double size) {
+                ItemHuntGame.this.sendToAll(new ClientboundSetBorderSizePacket(border));
             }
 
             @Override
-            public void onInterpolateSize(WorldBorder border, double fromSize, double toSize, long time, long l) {
-                ItemHuntGame.this.sendToAll(new WorldBorderInterpolateSizeS2CPacket(border));
+            public void onLerpSize(@NonNull WorldBorder border, double fromSize, double toSize, long time, long l) {
+                ItemHuntGame.this.sendToAll(new ClientboundSetBorderLerpSizePacket(border));
             }
 
             @Override
-            public void onCenterChanged(WorldBorder border, double centerX, double centerZ) {
-                ItemHuntGame.this.sendToAll(new WorldBorderCenterChangedS2CPacket(border));
+            public void onSetCenter(@NonNull WorldBorder border, double centerX, double centerZ) {
+                ItemHuntGame.this.sendToAll(new ClientboundSetBorderCenterPacket(border));
             }
 
             @Override
-            public void onWarningTimeChanged(WorldBorder border, int warningTime) {
-                ItemHuntGame.this.sendToAll(new WorldBorderWarningTimeChangedS2CPacket(border));
+            public void onSetWarningTime(@NonNull WorldBorder border, int warningTime) {
+                ItemHuntGame.this.sendToAll(new ClientboundSetBorderWarningDelayPacket(border));
             }
 
             @Override
-            public void onWarningBlocksChanged(WorldBorder border, int warningBlockDistance) {
-                ItemHuntGame.this.sendToAll(new WorldBorderWarningBlocksChangedS2CPacket(border));
+            public void onSetWarningBlocks(@NonNull WorldBorder border, int warningBlockDistance) {
+                ItemHuntGame.this.sendToAll(new ClientboundSetBorderWarningDistancePacket(border));
             }
 
             @Override
-            public void onDamagePerBlockChanged(WorldBorder border, double damagePerBlock) {}
+            public void onSetDamagePerBlock(@NonNull WorldBorder border, double damagePerBlock) {}
 
             @Override
-            public void onSafeZoneChanged(WorldBorder border, double safeZoneRadius) {}
+            public void onSetSafeZone(@NonNull WorldBorder border, double safeZoneRadius) {}
         };
     }
 }

@@ -1,8 +1,8 @@
 package io.github.jerozgen.itemhunt.event;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.stimuli.event.StimulusEvent;
 
@@ -11,14 +11,14 @@ public interface StatusEffectAddEvent {
         try {
             for (var listener : ctx.getListeners()) {
                 var result = listener.onAddStatusEffect(entity, effect, source);
-                if (result != ActionResult.PASS)
+                if (result != InteractionResult.PASS)
                     return result;
             }
         } catch (Throwable throwable) {
             ctx.handleException(throwable);
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     });
 
-    ActionResult onAddStatusEffect(Entity entity, StatusEffectInstance effect, @Nullable Entity source);
+    InteractionResult onAddStatusEffect(Entity entity, MobEffectInstance effect, @Nullable Entity source);
 }

@@ -4,9 +4,9 @@ import eu.pb4.sidebars.api.Sidebar;
 import eu.pb4.sidebars.api.lines.AbstractSidebarLine;
 import eu.pb4.sidebars.api.lines.LineBuilder;
 import eu.pb4.sidebars.api.lines.SidebarLine;
-import net.minecraft.scoreboard.number.NumberFormat;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.numbers.NumberFormat;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.api.game.common.widget.GameWidget;
 
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 public class ItemHuntSidebarWidget extends Sidebar implements GameWidget {
 
-    public ItemHuntSidebarWidget(Text title) {
+    public ItemHuntSidebarWidget(Component title) {
         super(title, Sidebar.Priority.MEDIUM);
     }
 
@@ -48,7 +48,7 @@ public class ItemHuntSidebarWidget extends Sidebar implements GameWidget {
     }
 
     @Override
-    public void setLine(int value, Text text) {
+    public void setLine(int value, Component text) {
         throw new UnsupportedOperationException();
     }
 
@@ -63,7 +63,7 @@ public class ItemHuntSidebarWidget extends Sidebar implements GameWidget {
     }
 
     @Override
-    public void addLines(Text... texts) {
+    public void addLines(Component... texts) {
         throw new UnsupportedOperationException();
     }
 
@@ -83,7 +83,7 @@ public class ItemHuntSidebarWidget extends Sidebar implements GameWidget {
     }
 
     @Override
-    public void replaceLines(Text... texts) {
+    public void replaceLines(Component... texts) {
         throw new UnsupportedOperationException();
     }
 
@@ -115,14 +115,14 @@ public class ItemHuntSidebarWidget extends Sidebar implements GameWidget {
         }
 
         @Override
-        public Text getText(ServerPlayNetworkHandler handler) {
-            if (handler.player.getNameForScoreboard().equals(name))
-                return Text.literal(name).styled(s -> s.withColor(ItemHuntTexts.ACCENT_COLOR));
-            return Text.literal(name);
+        public Component getText(ServerGamePacketListenerImpl handler) {
+            if (handler.player.getScoreboardName().equals(name))
+                return Component.literal(name).withStyle(s -> s.withColor(ItemHuntTexts.ACCENT_COLOR));
+            return Component.literal(name);
         }
 
         @Override
-        public @Nullable NumberFormat getNumberFormat(ServerPlayNetworkHandler handler) {
+        public @Nullable NumberFormat getNumberFormat(ServerGamePacketListenerImpl handler) {
             return null;
         }
     }
