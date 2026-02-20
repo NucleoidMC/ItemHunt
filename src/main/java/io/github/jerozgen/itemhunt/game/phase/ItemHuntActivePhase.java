@@ -17,6 +17,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -137,7 +138,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
 
             if (secondsLeft <= 10) {
                 if (secondsLeft > 0) for (var player : game.gameSpace().getPlayers()) {
-                    player.playSoundToPlayer(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.PLAYERS, .6f, 1);
+                    player.networkHandler.sendPacket(new PlaySoundFromEntityS2CPacket(RegistryEntry.of(SoundEvents.UI_BUTTON_CLICK.value()), SoundCategory.PLAYERS, player, .6f, 1, player.getEntityWorld().getRandom().nextLong()));
                 }
                 else this.end();
             }
@@ -186,8 +187,8 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
             player.networkHandler.sendPacket(new BundleS2CPacket(List.of(
                     new TitleFadeS2CPacket(0, 20, 10),
                     new TitleS2CPacket(Text.of("")),
-                    new SubtitleS2CPacket(ItemHuntTexts.itemObtained(item)))));
-            player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(), SoundCategory.PLAYERS, 1, 1);
+                    new SubtitleS2CPacket(ItemHuntTexts.itemObtained(item)),
+                    new PlaySoundFromEntityS2CPacket(RegistryEntry.of(SoundEvents.BLOCK_NOTE_BLOCK_BELL.value()), SoundCategory.PLAYERS, player, 1, 1, player.getEntityWorld().getRandom().nextLong()))));
         }
     }
 }

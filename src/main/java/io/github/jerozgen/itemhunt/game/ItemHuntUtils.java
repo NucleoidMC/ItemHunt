@@ -18,7 +18,7 @@ public class ItemHuntUtils {
         var player = server.getPlayerManager().getPlayer(uuid);
         if (player != null) return player.getName();
 
-        var profile = server.getUserCache().getByUuid(uuid);
-        return Text.of(profile.isEmpty() ? uuid.toString() : profile.get().getName());
+        var profile = server.getApiServices().nameToIdCache().getByUuid(uuid);
+        return Text.of(profile.isEmpty() ? uuid.toString() : profile.get().name());
     }
 }

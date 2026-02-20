@@ -137,7 +137,7 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerWor
             }
 
             @Override
-            public void onInterpolateSize(WorldBorder border, double fromSize, double toSize, long time) {
+            public void onInterpolateSize(WorldBorder border, double fromSize, double toSize, long time, long l) {
                 ItemHuntGame.this.sendToAll(new WorldBorderInterpolateSizeS2CPacket(border));
             }
 
