@@ -2,9 +2,9 @@ package io.github.jerozgen.itemhunt.game.phase;
 
 import io.github.jerozgen.itemhunt.game.ItemHuntGame;
 import io.github.jerozgen.itemhunt.game.ItemHuntTexts;
-import net.minecraft.network.packet.s2c.play.WorldBorderInitializeS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.GameMode;
+import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameResult;
 import xyz.nucleoid.plasmid.api.game.common.GameWaitingLobby;
@@ -31,22 +31,22 @@ public class ItemHuntWaitingPhase extends ItemHuntPhase {
     }
 
     private void start() {
-        var pos = game.spawnPos().toCenterPos();
+        var pos = game.spawnPos().getCenter();
         var worldBorder = game.world().getWorldBorder();
-        worldBorder.setCenter(pos.getX(), pos.getZ());
+        worldBorder.setCenter(pos.x(), pos.z());
         worldBorder.setSize(9);
         worldBorder.setWarningBlocks(-100);
     }
 
     private JoinAcceptorResult acceptPlayers(JoinAcceptor offer) {
-        return offer.teleport(game.world(), game.spawnPos().toCenterPos()).thenRunForEach((player, intent) -> {
-            player.changeGameMode(intent == JoinIntent.SPECTATE ? GameMode.SPECTATOR : GameMode.ADVENTURE);
-            player.sendMessage(ItemHuntTexts.description(game), false);
+        return offer.teleport(game.world(), game.spawnPos().getCenter()).thenRunForEach((player, intent) -> {
+            player.setGameMode(intent == JoinIntent.SPECTATE ? GameType.SPECTATOR : GameType.ADVENTURE);
+            player.displayClientMessage(ItemHuntTexts.description(game), false);
         });
     }
 
-    private void addPlayer(ServerPlayerEntity player) {
-        player.networkHandler.sendPacket(new WorldBorderInitializeS2CPacket(game.world().getWorldBorder()));
+    private void addPlayer(ServerPlayer player) {
+        player.connection.send(new ClientboundInitializeBorderPacket(game.world().getWorldBorder()));
     }
 
     private GameResult requestStart() {

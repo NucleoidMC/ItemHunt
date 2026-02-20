@@ -2,11 +2,11 @@ package io.github.jerozgen.itemhunt.game;
 
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
@@ -23,8 +23,8 @@ public class ObtainedItemsGui extends SimpleGui {
     private int page = 0;
     private final int maxPage;
 
-    public ObtainedItemsGui(ServerPlayerEntity player, Text title, List<Item> items) {
-        super(ScreenHandlerType.GENERIC_9X6, player, false);
+    public ObtainedItemsGui(ServerPlayer player, Component title, List<Item> items) {
+        super(MenuType.GENERIC_9x6, player, false);
         this.setTitle(title);
         this.items = items;
         this.maxPage = (items.size() - 1) / (9 * 5);
@@ -55,7 +55,7 @@ public class ObtainedItemsGui extends SimpleGui {
         var startIndex = page * 9 * 5;
         var endIndex = (page + 1) * 9 * 5 - 1;
         for (int i = startIndex; i <= endIndex; i++) {
-            if (i < items.size()) this.setSlot(i - startIndex, items.get(i).getDefaultStack());
+            if (i < items.size()) this.setSlot(i - startIndex, items.get(i).getDefaultInstance());
             else this.clearSlot(i - startIndex);
         }
 

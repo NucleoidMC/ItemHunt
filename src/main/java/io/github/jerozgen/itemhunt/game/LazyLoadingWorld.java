@@ -1,39 +1,40 @@
 package io.github.jerozgen.itemhunt.game;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.EmptyChunk;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.EmptyLevelChunk;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import xyz.nucleoid.fantasy.RuntimeWorld;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 
 public class LazyLoadingWorld extends RuntimeWorld {
-    private final WorldChunk chunk;
+    private final LevelChunk chunk;
 
-    protected LazyLoadingWorld(MinecraftServer server, RegistryKey<World> registryKey, RuntimeWorldConfig config, Style style) {
+    protected LazyLoadingWorld(MinecraftServer server, ResourceKey<Level> registryKey, RuntimeWorldConfig config, Style style) {
         super(server, registryKey, config, style);
-        var biome = server.getRegistryManager().getOrThrow(RegistryKeys.BIOME).getOrThrow(BiomeKeys.THE_VOID);
-        this.chunk = new EmptyChunk(this, ChunkPos.ORIGIN, biome) {
+        var biome = server.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.THE_VOID);
+        this.chunk = new EmptyLevelChunk(this, ChunkPos.ZERO, biome) {
             @Override
-            public BlockState getBlockState(BlockPos pos) {
-                return Blocks.BARRIER.getDefaultState();
+            public @NonNull BlockState getBlockState(BlockPos pos) {
+                return Blocks.BARRIER.defaultBlockState();
             }
         };
     }
 
     @Nullable
     @Override
-    public Chunk getChunk(int chunkX, int chunkZ, ChunkStatus leastStatus, boolean create) {
+    public ChunkAccess getChunk(int chunkX, int chunkZ, @NonNull ChunkStatus leastStatus, boolean create) {
         return this.chunk;
     }
 }

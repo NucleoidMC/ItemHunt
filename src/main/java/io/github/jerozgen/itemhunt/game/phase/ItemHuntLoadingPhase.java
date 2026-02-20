@@ -2,14 +2,13 @@ package io.github.jerozgen.itemhunt.game.phase;
 
 import io.github.jerozgen.itemhunt.game.ItemHuntGame;
 import io.github.jerozgen.itemhunt.game.ItemHuntTexts;
-import net.minecraft.entity.boss.BossBar;
-import net.minecraft.server.world.ChunkTicket;
-import net.minecraft.server.world.ChunkTicketType;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Unit;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.GameMode;
+import net.minecraft.world.BossEvent;
+import net.minecraft.server.level.Ticket;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameType;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameCloseReason;
 import xyz.nucleoid.plasmid.api.game.common.GlobalWidgets;
@@ -21,10 +20,10 @@ import xyz.nucleoid.plasmid.api.game.player.JoinAcceptorResult;
 import java.util.Set;
 
 public class ItemHuntLoadingPhase extends ItemHuntPhase {
-    private final ServerWorld loadingWorld;
+    private final ServerLevel loadingWorld;
     private final long spawnChunkPos;
 
-    public ItemHuntLoadingPhase(ItemHuntGame game, ServerWorld loadingWorld) {
+    public ItemHuntLoadingPhase(ItemHuntGame game, ServerLevel loadingWorld) {
         super(game);
         this.loadingWorld = loadingWorld;
         this.spawnChunkPos = new ChunkPos(game.spawnPos()).toLong();
@@ -33,9 +32,9 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
     @Override
     protected void setupPhase(GameActivity activity) {
         var widgets = GlobalWidgets.addTo(activity);
-        var bossbar = widgets.addBossBar(Text.empty(), BossBar.Color.YELLOW, BossBar.Style.PROGRESS);
+        var bossbar = widgets.addBossBar(Component.empty(), BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.PROGRESS);
         bossbar.setTitle(ItemHuntTexts.loading());
-        game.world().getChunkManager().addTicket(new ChunkTicket(ChunkTicketType.FORCED, 2), new ChunkPos(game.spawnPos()));
+        game.world().getChunkSource().addTicket(new Ticket(TicketType.FORCED, 2), new ChunkPos(game.spawnPos()));
 
         activity.listen(GamePlayerEvents.ACCEPT, this::acceptPlayer);
         activity.listen(GameActivityEvents.TICK, this::tick);
@@ -43,11 +42,11 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
     }
 
     private void tick() {
-        if (game.world().isChunkLoaded(spawnChunkPos)) {
+        if (game.world().areEntitiesLoaded(spawnChunkPos)) {
             for (var player : game.gameSpace().getPlayers().participants()) {
-                var pos = game.spawnPos().toCenterPos();
-                player.teleport(game.world(), pos.getX(), game.spawnPos().getY(), pos.getZ(), Set.of(), 0, 0, false);
-                player.changeGameMode(GameMode.ADVENTURE);
+                var pos = game.spawnPos().getCenter();
+                player.teleportTo(game.world(), pos.x(), game.spawnPos().getY(), pos.z(), Set.of(), 0, 0, false);
+                player.setGameMode(GameType.ADVENTURE);
             }
             var activePhase = new ItemHuntWaitingPhase(game);
             game.gameSpace().setActivity(activePhase::setup);
@@ -55,13 +54,13 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
     }
 
     private JoinAcceptorResult acceptPlayer(JoinAcceptor offer) {
-        return offer.teleport(loadingWorld, game.spawnPos().toCenterPos()).thenRunForEach(player -> {
-            player.sendMessage(ItemHuntTexts.description(game), false);
-            player.changeGameMode(GameMode.SPECTATOR);
+        return offer.teleport(loadingWorld, game.spawnPos().getCenter()).thenRunForEach(player -> {
+            player.displayClientMessage(ItemHuntTexts.description(game), false);
+            player.setGameMode(GameType.SPECTATOR);
         });
     }
 
     private void destroy(GameCloseReason reason) {
-        game.world().getChunkManager().removeTicket(ChunkTicketType.FORCED, new ChunkPos(game.spawnPos()), 3);
+        game.world().getChunkSource().removeTicketWithRadius(TicketType.FORCED, new ChunkPos(game.spawnPos()), 3);
     }
 }

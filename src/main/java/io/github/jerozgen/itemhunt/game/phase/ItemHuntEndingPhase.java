@@ -2,8 +2,8 @@ package io.github.jerozgen.itemhunt.game.phase;
 
 import io.github.jerozgen.itemhunt.game.ItemHuntGame;
 import io.github.jerozgen.itemhunt.game.ItemHuntTexts;
-import net.minecraft.entity.boss.BossBar;
-import net.minecraft.text.Text;
+import net.minecraft.world.BossEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameCloseReason;
@@ -27,7 +27,7 @@ public class ItemHuntEndingPhase extends ItemHuntPhase {
     @Override
     protected void setupPhase(GameActivity activity) {
         var widgets = GlobalWidgets.addTo(activity);
-        bossbar = widgets.addBossBar(Text.empty(), BossBar.Color.BLUE, BossBar.Style.PROGRESS);
+        bossbar = widgets.addBossBar(Component.empty(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.PROGRESS);
 
         activity.listen(GameActivityEvents.ENABLE, this::start);
         activity.listen(GameActivityEvents.TICK, this::tick);
@@ -36,11 +36,11 @@ public class ItemHuntEndingPhase extends ItemHuntPhase {
 
     private void start() {
         endDuration = TimeUnit.SECONDS.toMillis(game.config().endDuration());
-        endTime = Util.getMeasuringTimeMs() + endDuration;
+        endTime = Util.getMillis() + endDuration;
     }
 
     private void tick() {
-        var millisLeft = endTime - Util.getMeasuringTimeMs();
+        var millisLeft = endTime - Util.getMillis();
         var secondsLeft = (int) TimeUnit.MILLISECONDS.toSeconds(millisLeft);
         if (secondsLeft != lastSecondsLeft) {
             lastSecondsLeft = secondsLeft;

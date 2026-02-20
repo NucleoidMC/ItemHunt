@@ -1,8 +1,8 @@
 package io.github.jerozgen.itemhunt.event;
 
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
 import xyz.nucleoid.stimuli.event.StimulusEvent;
 
 public interface InventoryChangedEvent {
@@ -16,5 +16,5 @@ public interface InventoryChangedEvent {
         }
     });
 
-    void onInventoryChanged(ServerPlayerEntity player, PlayerInventory inventory, ItemStack stack);
+    void onInventoryChanged(ServerPlayer player, Inventory inventory, ItemStack stack);
 }
