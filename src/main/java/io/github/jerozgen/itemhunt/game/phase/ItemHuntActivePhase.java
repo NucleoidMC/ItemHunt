@@ -96,7 +96,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
             player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, -1, 0, false, false));
 
             game.config().startItems().ifPresent(stacks -> stacks.forEach(stack -> {
-                var stackCopy = stack.copy();
+                var stackCopy = stack.create();
                 stackCopy.set(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
                 player.getInventory().add(stackCopy);
             }));
@@ -166,11 +166,11 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
                 var isWinner = player.getUUID().equals(winner);
                 if (singleplayer) {
                     if (isWinner) player.sendSystemMessage(ItemHuntTexts.winSingleplayer(maxSize));
-                    else player.displayClientMessage(winText, false);
+                    else player.sendSystemMessage(winText, false);
                 } else {
                     if (isWinner) game.stat(stats -> stats.forPlayer(player).increment(StatisticKeys.GAMES_WON, 1));
                     else game.stat(stats -> stats.forPlayer(player).increment(StatisticKeys.GAMES_LOST, 1));
-                    player.displayClientMessage(winText, false);
+                    player.sendSystemMessage(winText, false);
                 }
                 new ObtainedItemsGui(player, guiTitleText, winnerItems).open();
             }

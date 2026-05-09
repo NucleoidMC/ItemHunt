@@ -26,7 +26,7 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
     public ItemHuntLoadingPhase(ItemHuntGame game, ServerLevel loadingWorld) {
         super(game);
         this.loadingWorld = loadingWorld;
-        this.spawnChunkPos = new ChunkPos(game.spawnPos()).toLong();
+        this.spawnChunkPos = ChunkPos.containing(game.spawnPos()).pack();
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
         var widgets = GlobalWidgets.addTo(activity);
         var bossbar = widgets.addBossBar(Component.empty(), BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.PROGRESS);
         bossbar.setTitle(ItemHuntTexts.loading());
-        game.world().getChunkSource().addTicket(new Ticket(TicketType.FORCED, 2), new ChunkPos(game.spawnPos()));
+        game.world().getChunkSource().addTicket(new Ticket(TicketType.FORCED, 2), ChunkPos.containing(game.spawnPos()));
 
         activity.listen(GamePlayerEvents.ACCEPT, this::acceptPlayer);
         activity.listen(GameActivityEvents.TICK, this::tick);
@@ -55,12 +55,12 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
 
     private JoinAcceptorResult acceptPlayer(JoinAcceptor offer) {
         return offer.teleport(loadingWorld, game.spawnPos().getCenter()).thenRunForEach(player -> {
-            player.displayClientMessage(ItemHuntTexts.description(game), false);
+            player.sendSystemMessage(ItemHuntTexts.description(game), false);
             player.setGameMode(GameType.SPECTATOR);
         });
     }
 
     private void destroy(GameCloseReason reason) {
-        game.world().getChunkSource().removeTicketWithRadius(TicketType.FORCED, new ChunkPos(game.spawnPos()), 3);
+        game.world().getChunkSource().removeTicketWithRadius(TicketType.FORCED, ChunkPos.containing(game.spawnPos()), 3);
     }
 }

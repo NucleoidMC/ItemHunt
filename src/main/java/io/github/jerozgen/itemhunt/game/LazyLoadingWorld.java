@@ -15,13 +15,13 @@ import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-import xyz.nucleoid.fantasy.RuntimeWorld;
-import xyz.nucleoid.fantasy.RuntimeWorldConfig;
+import xyz.nucleoid.fantasy.RuntimeLevel;
+import xyz.nucleoid.fantasy.RuntimeLevelConfig;
 
-public class LazyLoadingWorld extends RuntimeWorld {
+public class LazyLoadingWorld extends RuntimeLevel {
     private final LevelChunk chunk;
 
-    protected LazyLoadingWorld(MinecraftServer server, ResourceKey<Level> registryKey, RuntimeWorldConfig config, Style style) {
+    protected LazyLoadingWorld(MinecraftServer server, ResourceKey<Level> registryKey, RuntimeLevelConfig config, Style style) {
         super(server, registryKey, config, style);
         var biome = server.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.THE_VOID);
         this.chunk = new EmptyLevelChunk(this, ChunkPos.ZERO, biome) {

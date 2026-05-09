@@ -5,6 +5,7 @@ import io.github.jerozgen.itemhunt.game.ItemHuntGame;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.Identifier;
 import xyz.nucleoid.plasmid.api.game.GameType;
+import xyz.nucleoid.plasmid.api.game.GameTypes;
 
 public class ItemHunt implements ModInitializer {
     public static final String ID = "itemhunt";
@@ -15,6 +16,6 @@ public class ItemHunt implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        GameType.register(id(ID), ItemHuntConfig.CODEC, ItemHuntGame::open);
+        GameTypes.register(id(ID), ItemHuntConfig.CODEC, ItemHuntGame::open);
     }
 }

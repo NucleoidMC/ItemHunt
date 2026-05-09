@@ -41,7 +41,7 @@ public class ItemHuntWaitingPhase extends ItemHuntPhase {
     private JoinAcceptorResult acceptPlayers(JoinAcceptor offer) {
         return offer.teleport(game.world(), game.spawnPos().getCenter()).thenRunForEach((player, intent) -> {
             player.setGameMode(intent == JoinIntent.SPECTATE ? GameType.SPECTATOR : GameType.ADVENTURE);
-            player.displayClientMessage(ItemHuntTexts.description(game), false);
+            player.sendSystemMessage(ItemHuntTexts.description(game), false);
         });
     }
 

@@ -24,7 +24,7 @@ import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-import xyz.nucleoid.fantasy.RuntimeWorldConfig;
+import xyz.nucleoid.fantasy.RuntimeLevelConfig;
 import xyz.nucleoid.fantasy.util.VoidChunkGenerator;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameOpenContext;
@@ -43,18 +43,18 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerLev
     public static GameOpenProcedure open(GameOpenContext<ItemHuntConfig> context) {
         var config = context.config();
         var dimensionOptions = config.dimensionOptions();
-        var worldConfig = new RuntimeWorldConfig()
+        var worldConfig = new RuntimeLevelConfig()
                 .setDimensionType(dimensionOptions.type())
                 .setGenerator(dimensionOptions.generator())
                 .setSeed(RandomSource.create().nextLong());
-        var loadingWorldConfig = new RuntimeWorldConfig()
+        var loadingWorldConfig = new RuntimeLevelConfig()
                 .setDimensionType(BuiltinDimensionTypes.OVERWORLD)
                 .setGenerator(new VoidChunkGenerator(context.server().registryAccess().lookupOrThrow(Registries.BIOME)))
-                .setWorldConstructor(LazyLoadingWorld::new);
+                .setLevelConstructor(LazyLoadingWorld::new);
         return context.open((activity) -> {
             var gameSpace = activity.getGameSpace();
-            var loadingWorld = gameSpace.getWorlds().add(loadingWorldConfig);
-            var world = gameSpace.getWorlds().add(worldConfig);
+            var loadingWorld = gameSpace.getLevels().add(loadingWorldConfig);
+            var world = gameSpace.getLevels().add(worldConfig);
             var statistics = config.statisticBundleNamespace()
                     .map(value -> gameSpace.getStatistics().bundle(value))
                     .orElse(null);
@@ -101,7 +101,7 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerLev
         var chunkManager = world.getChunkSource();
         var noiseConfig = chunkManager.randomState();
         var chunkGenerator = chunkManager.getGenerator();
-        var startChunkPos = new ChunkPos(noiseConfig.sampler().findSpawnPosition());
+        var startChunkPos = ChunkPos.containing(noiseConfig.sampler().findSpawnPosition());
 
         var dx = 0;
         var dz = 0;
@@ -109,7 +109,7 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerLev
         var stepZ = -1;
         for (var i = 0; i < 11 * 11; i++) {
             if (dx >= -5 && dx <= 5 && dz >= -5 && dz <= 5) {
-                var chunkPos = new ChunkPos(startChunkPos.x + dx, startChunkPos.z + dz);
+                var chunkPos = new ChunkPos(startChunkPos.x() + dx, startChunkPos.z() + dz);
                 var x = chunkPos.getMinBlockX() + 8;
                 var z = chunkPos.getMinBlockZ() + 8;
                 var y = chunkGenerator.getFirstFreeHeight(x, z, Heightmap.Types.MOTION_BLOCKING, world, noiseConfig);
