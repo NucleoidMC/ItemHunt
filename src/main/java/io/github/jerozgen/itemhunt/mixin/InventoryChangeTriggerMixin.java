@@ -1,7 +1,7 @@
 package io.github.jerozgen.itemhunt.mixin;
 
 import io.github.jerozgen.itemhunt.event.InventoryChangedEvent;
-import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.triggers.InventoryChangeTrigger;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerPlayer;

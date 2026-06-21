@@ -5,6 +5,7 @@ import io.github.jerozgen.itemhunt.game.ItemHuntTexts;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameResult;
 import xyz.nucleoid.plasmid.api.game.common.GameWaitingLobby;
@@ -31,7 +32,7 @@ public class ItemHuntWaitingPhase extends ItemHuntPhase {
     }
 
     private void start() {
-        var pos = game.spawnPos().getCenter();
+        var pos = Vec3.atCenterOf(game.spawnPos());
         var worldBorder = game.world().getWorldBorder();
         worldBorder.setCenter(pos.x(), pos.z());
         worldBorder.setSize(9);
@@ -39,7 +40,7 @@ public class ItemHuntWaitingPhase extends ItemHuntPhase {
     }
 
     private JoinAcceptorResult acceptPlayers(JoinAcceptor offer) {
-        return offer.teleport(game.world(), game.spawnPos().getCenter()).thenRunForEach((player, intent) -> {
+        return offer.teleport(game.world(), Vec3.atCenterOf(game.spawnPos())).thenRunForEach((player, intent) -> {
             player.setGameMode(intent == JoinIntent.SPECTATE ? GameType.SPECTATOR : GameType.ADVENTURE);
             player.sendSystemMessage(ItemHuntTexts.description(game), false);
         });

@@ -13,6 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -29,6 +30,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameCloseReason;
 import xyz.nucleoid.plasmid.api.game.common.GlobalWidgets;
@@ -107,7 +109,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
             game.stat(stats -> stats.forPlayer(player).increment(StatisticKeys.GAMES_PLAYED, 1));
         }
 
-        game.world().getEntities(EntityType.ITEM, Entity::isAlive).forEach(x -> x.kill(game.world()));
+        game.world().getEntities(EntityTypes.ITEM, Entity::isAlive).forEach(x -> x.kill(game.world()));
         game.world().getWorldBorder().setSize(99999);
 
         startTime = Util.getMillis();
@@ -115,7 +117,7 @@ public class ItemHuntActivePhase extends ItemHuntPhase {
     }
 
     private JoinAcceptorResult acceptPlayer(JoinAcceptor offer) {
-        return offer.teleport(game.world(), game.spawnPos().getCenter()).thenRunForEach(player -> {
+        return offer.teleport(game.world(), Vec3.atCenterOf(game.spawnPos())).thenRunForEach(player -> {
             player.setGameMode(GameType.SPECTATOR);
         });
     }

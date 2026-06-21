@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameCloseReason;
 import xyz.nucleoid.plasmid.api.game.common.GlobalWidgets;
@@ -44,7 +45,7 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
     private void tick() {
         if (game.world().areEntitiesLoaded(spawnChunkPos)) {
             for (var player : game.gameSpace().getPlayers().participants()) {
-                var pos = game.spawnPos().getCenter();
+                var pos = Vec3.atCenterOf(game.spawnPos());
                 player.teleportTo(game.world(), pos.x(), game.spawnPos().getY(), pos.z(), Set.of(), 0, 0, false);
                 player.setGameMode(GameType.ADVENTURE);
             }
@@ -54,7 +55,7 @@ public class ItemHuntLoadingPhase extends ItemHuntPhase {
     }
 
     private JoinAcceptorResult acceptPlayer(JoinAcceptor offer) {
-        return offer.teleport(loadingWorld, game.spawnPos().getCenter()).thenRunForEach(player -> {
+        return offer.teleport(loadingWorld, Vec3.atCenterOf(game.spawnPos())).thenRunForEach(player -> {
             player.sendSystemMessage(ItemHuntTexts.description(game), false);
             player.setGameMode(GameType.SPECTATOR);
         });
