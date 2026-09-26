@@ -101,7 +101,7 @@ public record ItemHuntGame(ItemHuntConfig config, GameSpace gameSpace, ServerLev
         var chunkManager = world.getChunkSource();
         var noiseConfig = chunkManager.randomState();
         var chunkGenerator = chunkManager.getGenerator();
-        var startChunkPos = ChunkPos.containing(noiseConfig.sampler().findSpawnPosition());
+        var startChunkPos = chunkGenerator.getOrigin(noiseConfig);
 
         var dx = 0;
         var dz = 0;
